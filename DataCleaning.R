@@ -3,7 +3,7 @@ library('fastDummies')
 
 rm(list=ls())
 
-setwd("~/ProgettoFinaleBLAMCS")
+setwd("~/BLAMCS-project2022")
 ford <- read.table("ford.txt", header=T)
 
 summary(ford)
