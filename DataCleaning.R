@@ -1,6 +1,5 @@
 library('rjags')
 library('fastDummies')
-library('ggplot2')
 
 rm(list=ls())
 
@@ -13,8 +12,6 @@ modelCategories <- unique(ford$model)
 transmissionCategories <- unique(ford$transmission)
 fueltCategories <- unique(ford$fuelType)
 yearCat <- unique(ford$year)
-engineSize <- unique(ford$engineSize)
-summary(ford$engineSize)
 
 # Transform categorical attributes using dummy variable encoding
 ford2 <- ford
@@ -66,19 +63,3 @@ predictedTest <- predict.lm(object=FordLM, newdata=testX)
 rmseTest <- sqrt(mean((predictedTest-testY)^2))
 print(rmseTest)
 print((rmseTest / mean(ford2$price))*100)
-
-# Visualize covariates
-par(mfrow=c(3,2))
-hist(ford2$year, main="Year")
-hist(ford2$price, main="Price")
-hist(ford2$mileage)
-hist(ford2$tax)
-hist(ford2$mpg)
-hist(ford2$engineSize)
-ggplot(ford, aes(x=reorder(transmission, transmission, function(x)-length(x)))) +
-  geom_bar(fill='red') +  labs(x='Transmission')
-ggplot(ford, aes(x=reorder(model, model, function(x)-length(x)))) +
-  geom_bar(fill='red') +  labs(x='Car Model')
-ggplot(ford, aes(x=reorder(fuelType, fuelType, function(x)-length(x)))) +
-  geom_bar(fill='red') +  labs(x='Fuel Type')
-
