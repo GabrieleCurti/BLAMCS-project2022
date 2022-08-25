@@ -1,0 +1,27 @@
+
+  model {
+    # Likelihood 
+    for (i in 1:N) {
+      Y[i] ~ dnorm(mu[i], prec)
+      mu[i] <- alpha + inprod(X[i,], beta)
+    } 
+    
+    # Prior
+    alpha ~ dnorm(0, 0.001)
+    
+    for(j in 1:p) {
+    	beta[j] ~ dnorm(0, 0.001)
+    }
+    
+    sigma ~ dgamma(0.01, 0.01)
+    prec <- 1 / (sigma*sigma)
+    
+    nu <- nuMinusOne + 1
+    nuMinusOne ~ dexp(1/29.0)
+    
+    #Prediction
+    for(i in 1:Ntest){
+      yP ~ dt(alpha + inprod(Xp[i,], beta), prec, nu)
+    }
+  }
+  
