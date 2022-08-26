@@ -3,7 +3,7 @@ library('fastDummies')
 
 rm(list=ls())
 
-#setwd("~/BLAMCS-project2022")
+setwd("~/GitHub/BLAMCS-project2022")
 ford <- read.table("ford.txt", header=T)
 
 summary(ford)
@@ -43,9 +43,10 @@ sample <- sample(c(TRUE, FALSE), nrow(ford2), replace=TRUE, prob=c(0.7,0.3))
 train  <- ford2[sample, ]
 test   <- ford2[!sample, ]
 
-# Trying a simple linear regression
+# Trying a simple linear regression with all features
 y <- train$price
 x <- train[,-2]
+yp <- test$price
 xp <- test[,-2]
 
 x <- as.matrix(x)
@@ -77,62 +78,55 @@ cat(
     # Likelihood 
     for (i in 1:N) {
       y[i] ~ dnorm(mu[i], prec)
-      mu[i] <- beta0 + inprod(X[i,], beta)
+      mu[i] <- zbeta0 + inprod(x[i,], zbeta)
     } 
     
     # Prior
-    beta0 ~ dnorm(0, 1/4) # Since data are normalized, they are [-1, 1]
+    zbeta0 ~ dnorm(0, 1/4) # Since data are normalized, they are in [-1, 1]
     
     for(j in 1:p) {
-    	beta[j] ~ dnorm(0, 1/4)
+    	zbeta[j] ~ dnorm(0, 1/4)
     }
     
-    sigma ~ dunif( 1.0E-5 , 1.0E+1 )
-    prec <- 1 / (sigma*sigma)
+    zsigma ~ dunif( 1.0E-5 , 1.0E+1 )
+    prec <- 1 / (zsigma*zsigma)
     
     #Prediction
-    for(i in 1:Ntest){
-      yP ~ dnorm(beta0 + inprod(Xp[i,], beta), prec)
+    for(t in 1:Ntest){
+      yp[t] ~ dnorm(zbeta0 + inprod(xp[t,], zbeta), prec)
     }
+    
+    # Transform to original scale:
+    beta[1:p] <- ( zbeta[1:p] / xsd[1:p] )*ysd
+    beta0 <- zbeta0*ysd  + ym - sum( zbeta[1:p] * xm[1:p] / xsd[1:p] )*ysd
+    sigma <- zsigma*ysd
   }
   "
-  , file = "models/predictionJags.bug")
+  , file = "models/predictionNormalJags.bug")
 
-params <- c("alpha", "beta", "sigma", "Xp", "yP")
+params <- c("beta0", "beta", "sigma", "yp")
 
-jagsdata = list(N = N, Y = Y, X = X, p = p)
+jagsdata = list(N = N, y = y, x = x, p = p, xp = xp, Ntest = Ntest)
 
 # Compile
-fit <- jags.model(file = "models/simpleJags.bug",
-                  data = jagsdata, n.adapt = 1000)
+fit <- jags.model(file = "models/predictionNormalJags.bug",
+                  data = jagsdata, n.adapt = 500)
 
-# Burn-in - done with the n.adapt phase
-# update(fit, n.iter = 1000)
+# Burn-in
+update(fit, n.iter = 1000)
 
 # Sample
 results <- coda.samples(fit, variable.names = params,
-                        n.iter = 5000, thin = 10)
+                        n.iter = 10000, thin = 2)
 
-save(results, file='linearModelChain.dat')
-
-summary(results)
-plot(results[,3])
-resultMatrix <- as.matrix(results)
-
+save(results, file='predictionNormalChain.dat')
 
 post_means <- colMeans(as.matrix(results))
 print(post_means)
-q = post_means["alpha"]
+
 m = as.matrix(post_means)
-m = post_means[-1]
-m = m[-27]
+ypred = m[29:2315]
 
-prediction = q + X %*% m
-plot(prediction, Y)
-rmse <- sqrt(mean((prediction-Y)^2))
-
-space = 1:N
-
-plot(Y)
-lines(space, Y)
-lines(space, prediction)
+plot(ypred, yp)
+rmse <- sqrt(mean((ypred-yp)^2))
+print((rmse / mean(yp))*100)
