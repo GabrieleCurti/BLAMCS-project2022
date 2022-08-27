@@ -3,7 +3,7 @@ library('fastDummies')
 
 rm(list=ls())
 
-setwd("~/Documents/GitHub/BLAMCS-project2022")
+setwd("~/GitHub/BLAMCS-project2022")
 ford <- read.table("ford.txt", header=T)
 
 summary(ford)
@@ -61,11 +61,13 @@ cat(
   "
   # Normalize data:
   data {
+    # Standardize target
     ym <- mean(y)
     ysd <- sd(y)
     for ( i in 1:N ) {
       zy[i] <- ( y[i] - ym ) / ysd
     }
+    # Standardize covariates
     for ( j in 1:p ) {
       xm[j]  <- mean(x[,j])
       xsd[j] <-   sd(x[,j])
@@ -73,12 +75,20 @@ cat(
         zx[i,j] <- ( x[i,j] - xm[j] ) / xsd[j]
       }
     }
+    # Standardize test set!
+    for ( j in 1:p ) {
+      xpm[j]  <- mean(xp[,j])
+      xpsd[j] <-   sd(xp[,j])
+      for ( i in 1:Ntest ) {
+        zxp[i,j] <- ( xp[i,j] - xpm[j] ) / xpsd[j]
+      }
+    }
   }
   model {
     # Likelihood 
     for (i in 1:N) {
-      y[i] ~ dt( mu[i] , prec , nu )
-      mu[i] <- zbeta0 + inprod(x[i,], zbeta)
+      zy[i] ~ dt(mu[i], prec, nu)
+      mu[i] <- zbeta0 + inprod(zx[i,], zbeta)
     } 
     
     # Prior
@@ -88,14 +98,16 @@ cat(
     	zbeta[j] ~ dnorm(0, 1/4)
     }
     
+    nu <- nuMinusOne + 1
+    nuMinusOne ~ dexp(1/30)
+    
     zsigma ~ dunif( 1.0E-5 , 1.0E+1 )
     prec <- 1 / (zsigma*zsigma)
     
-    nu ~ dexp (1/30.0)
-    
     #Prediction
     for(t in 1:Ntest){
-      yp[t] ~ dt(zbeta0 + inprod(xp[t,], zbeta), prec, nu)
+      zyp[t] ~ dt(zbeta0 + inprod(xp[t,], zbeta), prec, nu)
+      yp[t] <- zyp[t] * ysd + ym # Original scale
     }
     
     # Transform to original scale:
@@ -119,9 +131,11 @@ update(fit, n.iter = 1000)
 
 # Sample
 results <- coda.samples(fit, variable.names = params,
-                        n.iter = 10000, thin = 2)
+                        n.iter = 2000, thin = 2)
 
 save(results, file='chains/predictionStudentChain.dat')
+
+# load('chains/predictionStudentChain.dat')
 
 post_means <- colMeans(as.matrix(results))
 print(post_means)

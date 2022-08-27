@@ -3,7 +3,7 @@ library('fastDummies')
 
 rm(list=ls())
 
-setwd("~/Documents/GitHub/BLAMCS-project2022")
+setwd("~/GitHub/BLAMCS-project2022")
 ford <- read.table("ford.txt", header=T)
 
 summary(ford)
@@ -128,11 +128,11 @@ update(fit, n.iter = 1000)
 
 # Sample
 results <- coda.samples(fit, variable.names = params,
-                        n.iter = 10000, thin = 2)
+                        n.iter = 2000, thin = 2)
 
 save(results, file='chains/predictionNormalChain.dat')
 
-load('predictionNormalChain.dat')
+# load('predictionNormalChain.dat')
 
 post_means <- colMeans(as.matrix(results))
 print(post_means)
