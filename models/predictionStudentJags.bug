@@ -1,13 +1,11 @@
 
   # Normalize data:
   data {
-    # Standardize target
     ym <- mean(y)
     ysd <- sd(y)
     for ( i in 1:N ) {
       zy[i] <- ( y[i] - ym ) / ysd
     }
-    # Standardize covariates
     for ( j in 1:p ) {
       xm[j]  <- mean(x[,j])
       xsd[j] <-   sd(x[,j])
@@ -15,20 +13,12 @@
         zx[i,j] <- ( x[i,j] - xm[j] ) / xsd[j]
       }
     }
-    # Standardize test set!
-    for ( j in 1:p ) {
-      xpm[j]  <- mean(xp[,j])
-      xpsd[j] <-   sd(xp[,j])
-      for ( i in 1:Ntest ) {
-        zxp[i,j] <- ( xp[i,j] - xpm[j] ) / xpsd[j]
-      }
-    }
   }
   model {
     # Likelihood 
     for (i in 1:N) {
-      zy[i] ~ dnorm(mu[i], prec)
-      mu[i] <- zbeta0 + inprod(zx[i,], zbeta)
+      y[i] ~ dt( mu[i] , prec , nu )
+      mu[i] <- zbeta0 + inprod(x[i,], zbeta)
     } 
     
     # Prior
@@ -41,10 +31,11 @@
     zsigma ~ dunif( 1.0E-5 , 1.0E+1 )
     prec <- 1 / (zsigma*zsigma)
     
+    nu ~ dexp (1/30.0)
+    
     #Prediction
     for(t in 1:Ntest){
-      zyp[t] ~ dnorm(zbeta0 + inprod(xp[t,], zbeta), prec)
-      yp[t] <- zyp[t] * ysd + ym # Original scale
+      yp[t] ~ dt(zbeta0 + inprod(xp[t,], zbeta), prec, nu)
     }
     
     # Transform to original scale:

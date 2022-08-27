@@ -3,7 +3,7 @@ library('fastDummies')
 
 rm(list=ls())
 
-setwd("~/GitHub/BLAMCS-project2022")
+setwd("~/Documents/GitHub/BLAMCS-project2022")
 ford <- read.table("ford.txt", header=T)
 
 summary(ford)
@@ -77,7 +77,7 @@ cat(
   model {
     # Likelihood 
     for (i in 1:N) {
-      y[i] ~ dnorm(mu[i], prec)
+      y[i] ~ dt( mu[i] , prec , nu )
       mu[i] <- zbeta0 + inprod(x[i,], zbeta)
     } 
     
@@ -91,9 +91,11 @@ cat(
     zsigma ~ dunif( 1.0E-5 , 1.0E+1 )
     prec <- 1 / (zsigma*zsigma)
     
+    nu ~ dexp (1/30.0)
+    
     #Prediction
     for(t in 1:Ntest){
-      yp[t] ~ dnorm(zbeta0 + inprod(xp[t,], zbeta), prec)
+      yp[t] ~ dt(zbeta0 + inprod(xp[t,], zbeta), prec, nu)
     }
     
     # Transform to original scale:
@@ -102,14 +104,14 @@ cat(
     sigma <- zsigma*ysd
   }
   "
-  , file = "models/predictionNormalJags.bug")
+  , file = "models/predictionStudentJags.bug")
 
 params <- c("beta0", "beta", "sigma", "yp")
 
 jagsdata = list(N = N, y = y, x = x, p = p, xp = xp, Ntest = Ntest)
 
 # Compile
-fit <- jags.model(file = "models/predictionNormalJags.bug",
+fit <- jags.model(file = "models/predictionStudentJags.bug",
                   data = jagsdata, n.adapt = 500)
 
 # Burn-in
@@ -119,7 +121,7 @@ update(fit, n.iter = 1000)
 results <- coda.samples(fit, variable.names = params,
                         n.iter = 10000, thin = 2)
 
-save(results, file='predictionNormalChain.dat')
+save(results, file='chains/predictionStudentChain.dat')
 
 post_means <- colMeans(as.matrix(results))
 print(post_means)
