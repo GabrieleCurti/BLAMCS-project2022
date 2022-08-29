@@ -28,12 +28,12 @@
     # Likelihood 
     for (i in 1:N) {
       zy[i] ~ dnorm(muz[i], prec)
-      muz[i] <- zbeta0 + inprod(zx[i,], zbeta)
+      muz[i] <- zalpha + inprod(zx[i,], zbeta)
       mu[i] <- muz[i] * ysd + ym # Original Scale
     } 
     
     # Prior
-    zbeta0 ~ dnorm(0, 1/4) # Since data are normalized, they are in [-1, 1]
+    zalpha ~ dnorm(0, 1/4) # Since data are normalized, they are in [-1, 1]
     
     for(j in 1:p) {
     	zbeta[j] ~ dnorm(0, 1/4)
@@ -44,13 +44,13 @@
     
     #Prediction
     for(t in 1:Ntest){
-      zyp[t] ~ dnorm(zbeta0 + inprod(zxp[t,], zbeta), prec)
+      zyp[t] ~ dnorm(zalpha + inprod(zxp[t,], zbeta), prec)
       yp[t] <- zyp[t] * ysd + ym # Original scale
     }
     
     # Transform to original scale:
     beta[1:p] <- ( zbeta[1:p] / xsd[1:p] )*ysd
-    beta0 <- zbeta0*ysd  + ym - sum( zbeta[1:p] * xm[1:p] / xsd[1:p] )*ysd
+    alpha <- zalpha*ysd  + ym - sum( zbeta[1:p] * xm[1:p] / xsd[1:p] )*ysd
     sigma <- zsigma*ysd
     
     # calculate R^2

@@ -25,9 +25,9 @@ ford2$model <- NULL
 ford2$transmission <- NULL
 
 #Dropping one of each dummy variable since they are linearly reconstructable using a XOR
-ford2$fuelType_Hybrid <- NULL
-ford2$`transmission_Semi-Auto` <- NULL
-ford2$`model_ Grand Tourneo Connect` <- NULL #Who bought this?
+#ford2$fuelType_Hybrid <- NULL
+#ford2$`transmission_Semi-Auto` <- NULL
+#ford2$`model_ Grand Tourneo Connect` <- NULL #Who bought this?
 
 #Transforming ordinal attributes using ordinal variable enconding
 encode_ordinal <- function(x, order = unique(x)) {
@@ -46,8 +46,16 @@ test   <- ford2[!sample, ]
 # Trying a simple linear regression with all features
 y <- train$price
 x <- train[,-2]
+x <- train[,-18]
+x <- train[,-21]
+x <- train[,-26]
+x <- train[,-29]
 yp <- test$price
 xp <- test[,-2]
+xp <- train[,-18]
+xp <- train[,-21]
+xp <- train[,-26]
+xp <- train[,-29]
 
 x <- as.matrix(x)
 y <- as.vector(y)
@@ -134,15 +142,39 @@ update(fit, n.iter = 1000)
 
 # Sample
 results <- coda.samples(fit, variable.names = params,
-                        n.iter = 2000, thin = 2)
+                        n.iter = 5000, thin = 10)
 
 #save(results, file='chains/predictionNormal3Chains.dat')
+
+load("chains/allCovariates/betasAndStuff.dat")
+allMatrix <- as.matrix(betasMCMC)
+print(mean(allMatrix[,"R2"]))
+
+load("chains/basSelection/betasAndStuff.dat")
+allMatrix <- as.matrix(betasMCMC)
+print(mean(allMatrix[,"R2"]))
+
+load("chains/spikeNSlab5/betasAndStuff.dat")
+allMatrix <- as.matrix(betasMCMC)
+print(mean(allMatrix[,"R2"]))
+
+load("chains/spikeNSlab6/betasAndStuff.dat")
+allMatrix <- as.matrix(betasMCMC)
+print(mean(allMatrix[,"R2"]))
+
+load("chains/allCovariates/predictionOnTest.dat")
+allMatrix <- as.matrix(predictionsTestMCMC)
+yPred <- colMeans(allMatrix)
+print(sqrt(mean((yPred-yp)^2)))
+
 
 resultMatrix <- as.matrix(results)
 beta <- resultMatrix[,grep("^beta$|^beta\\[",colnames(resultMatrix))]
 mu <- resultMatrix[,grep("^mu$|^mu\\[",colnames(resultMatrix))]
 ypred <- resultMatrix[,grep("^yp$|^yp\\[",colnames(resultMatrix))]
 r2 <- resultMatrix[,"R2"]
+sigma <- resultMatrix[,"sigma"]
+print(mean(sigma))
 
 ypredMean <- colMeans(as.matrix(ypred))
 
