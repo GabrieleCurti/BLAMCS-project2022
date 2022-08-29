@@ -106,7 +106,7 @@ cat(
     
     #Prediction
     for(t in 1:Ntest){
-      zyp[t] ~ dt(zbeta0 + inprod(xp[t,], zbeta), prec, nu)
+      zyp[t] ~ dt(zbeta0 + inprod(zxp[t,], zbeta), prec, nu)
       yp[t] <- zyp[t] * ysd + ym # Original scale
     }
     
@@ -124,7 +124,7 @@ jagsdata = list(N = N, y = y, x = x, p = p, xp = xp, Ntest = Ntest)
 
 # Compile
 fit <- jags.model(file = "models/predictionStudentJags.bug",
-                  data = jagsdata, n.adapt = 500)
+                  data = jagsdata, n.adapt = 500, n.chains = 2)
 
 # Burn-in
 update(fit, n.iter = 1000)

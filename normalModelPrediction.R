@@ -87,8 +87,9 @@ cat(
   model {
     # Likelihood 
     for (i in 1:N) {
-      zy[i] ~ dnorm(mu[i], prec)
-      mu[i] <- zbeta0 + inprod(zx[i,], zbeta)
+      zy[i] ~ dnorm(muz[i], prec)
+      muz[i] <- zbeta0 + inprod(zx[i,], zbeta)
+      mu[i] <- muz[i] * ysd + ym # Original Scale
     } 
     
     # Prior
@@ -103,7 +104,7 @@ cat(
     
     #Prediction
     for(t in 1:Ntest){
-      zyp[t] ~ dnorm(zbeta0 + inprod(xp[t,], zbeta), prec)
+      zyp[t] ~ dnorm(zbeta0 + inprod(zxp[t,], zbeta), prec)
       yp[t] <- zyp[t] * ysd + ym # Original scale
     }
     
@@ -111,17 +112,22 @@ cat(
     beta[1:p] <- ( zbeta[1:p] / xsd[1:p] )*ysd
     beta0 <- zbeta0*ysd  + ym - sum( zbeta[1:p] * xm[1:p] / xsd[1:p] )*ysd
     sigma <- zsigma*ysd
+    
+    # calculate R^2
+    varFit <- (sd(muz))^2
+    varRes <- zsigma^2 # get the variance of residuals
+    R2 <- varFit / (varFit + varRes)
   }
   "
   , file = "models/predictionNormalJags.bug")
 
-params <- c("beta0", "beta", "sigma", "yp")
+params <- c("beta0", "beta", "sigma", "yp", "R2", "mu")
 
 jagsdata = list(N = N, y = y, x = x, p = p, xp = xp, Ntest = Ntest)
 
 # Compile
 fit <- jags.model(file = "models/predictionNormalJags.bug",
-                  data = jagsdata, n.adapt = 500)
+                  data = jagsdata, n.adapt = 500, n.chains = 1)
 
 # Burn-in
 update(fit, n.iter = 1000)
@@ -130,16 +136,29 @@ update(fit, n.iter = 1000)
 results <- coda.samples(fit, variable.names = params,
                         n.iter = 2000, thin = 2)
 
-save(results, file='chains/predictionNormalChain.dat')
+#save(results, file='chains/predictionNormal3Chains.dat')
 
-# load('predictionNormalChain.dat')
+resultMatrix <- as.matrix(results)
+beta <- resultMatrix[,grep("^beta$|^beta\\[",colnames(resultMatrix))]
+mu <- resultMatrix[,grep("^mu$|^mu\\[",colnames(resultMatrix))]
+ypred <- resultMatrix[,grep("^yp$|^yp\\[",colnames(resultMatrix))]
+r2 <- resultMatrix[,"R2"]
 
-post_means <- colMeans(as.matrix(results))
-print(post_means)
+ypredMean <- colMeans(as.matrix(ypred))
 
-m = as.matrix(post_means)
-ypred = m[29:2315]
+plot(ypredMean, yp)
+rmse <- sqrt(mean((ypredMean-yp)^2))
 
-plot(ypred, yp)
-rmse <- sqrt(mean((ypred-yp)^2))
+muMean <- colMeans(as.matrix(mu))
+plot(muMean, y)
+rmseTrain <- sqrt(mean((muMean-y)^2))
+
 print((rmse / mean(yp))*100)
+print(rmseTrain)
+
+# Compute R^2 for credible parameters:
+YcorX = cor( y , x ) # correlation of y with each x predictor
+zbeta = (mean(y)-beta) / sd(y)
+Rsq = zbeta %*% matrix( YcorX , ncol=1 )
+print(mean(Rsq))
+print(mean(r2))

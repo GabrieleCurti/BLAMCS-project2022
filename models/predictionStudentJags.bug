@@ -46,7 +46,7 @@
     
     #Prediction
     for(t in 1:Ntest){
-      zyp[t] ~ dt(zbeta0 + inprod(xp[t,], zbeta), prec, nu)
+      zyp[t] ~ dt(zbeta0 + inprod(zxp[t,], zbeta), prec, nu)
       yp[t] <- zyp[t] * ysd + ym # Original scale
     }
     

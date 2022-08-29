@@ -27,8 +27,9 @@
   model {
     # Likelihood 
     for (i in 1:N) {
-      zy[i] ~ dnorm(mu[i], prec)
-      mu[i] <- zbeta0 + inprod(zx[i,], zbeta)
+      zy[i] ~ dnorm(muz[i], prec)
+      muz[i] <- zbeta0 + inprod(zx[i,], zbeta)
+      mu[i] <- muz[i] * ysd + ym # Original Scale
     } 
     
     # Prior
@@ -43,7 +44,7 @@
     
     #Prediction
     for(t in 1:Ntest){
-      zyp[t] ~ dnorm(zbeta0 + inprod(xp[t,], zbeta), prec)
+      zyp[t] ~ dnorm(zbeta0 + inprod(zxp[t,], zbeta), prec)
       yp[t] <- zyp[t] * ysd + ym # Original scale
     }
     
@@ -51,5 +52,10 @@
     beta[1:p] <- ( zbeta[1:p] / xsd[1:p] )*ysd
     beta0 <- zbeta0*ysd  + ym - sum( zbeta[1:p] * xm[1:p] / xsd[1:p] )*ysd
     sigma <- zsigma*ysd
+    
+    # calculate R^2
+    varFit <- (sd(muz))^2
+    varRes <- zsigma^2 # get the variance of residuals
+    R2 <- varFit / (varFit + varRes)
   }
   
