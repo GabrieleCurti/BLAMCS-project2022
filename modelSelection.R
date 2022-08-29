@@ -151,18 +151,18 @@ plot1
 
 cols <- colnames(X)
 
-data5 <- X
+data5 <- as.matrix(ford2)
 for(i in p:1) {
   if(post_mean_g[i] < 0.5) {
     data5 <- data5[,-i]
   }
 }
-save(data5, file='data/model05.dat')
+save(data5, file='data/ford05.dat')
 
-data6 <- X
+data6 <- as.matrix(ford2)
 for(i in p:1) {
   if(post_mean_g[i] < 0.6) {
     data6 <- data6[,-i]
   }
 }
-save(data6, file='data/model06.dat')
+save(data6, file='data/ford06.dat')
