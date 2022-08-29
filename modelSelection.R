@@ -45,63 +45,49 @@ sample <- sample(c(TRUE, FALSE), nrow(ford2), replace=TRUE, prob=c(0.7,0.3))
 train  <- ford2[sample, ]
 test   <- ford2[!sample, ]
 
-# Normalize function
-normalize <- function(x) {
-  col <- 5
-  if (is.null(ncol(x))) {
-    x <- (x-mean(x)) / sd(x)
-  } else {
-    for (i in 1:col) {
-      print(mean(x[,i]))
-      x[,i] <- (x[,i]-mean(x[,i])) / sd(x[,i])
-    }
-  }
-  x
-}
-
 # Trying a simple linear regression
 Y <- train$price
-
 X <- train[,-2]
-X <- normalize(X)
-summary(X)
 
 X <- as.matrix(X)
 Y <- as.vector(Y)
 # Get dimensions
 N <- dim(X)[1]
-p1 <- 6 #last continuous variable
-p2 <- dim(X)[2]
+p <- dim(X)[2]
 
 #Jags model
 cat(
   "
+  data {
+    # Standardize target
+    ym <- mean(Y)
+    ysd <- sd(Y)
+    for ( i in 1:N ) {
+      zy[i] <- ( Y[i] - ym ) / ysd
+    }
+    # Standardize covariates
+    for ( j in 1:p ) {
+      xm[j]  <- mean(X[,j])
+      xsd[j] <-   sd(X[,j])
+      for ( i in 1:N ) {
+        zx[i,j] <- ( X[i,j] - xm[j] ) / xsd[j]
+      }
+    }
+  }
+  
   model {
     # Likelihood 
     for (i in 1:N) {
-      Y[i] ~ dnorm(mu[i], prec)
-      mu[i] <- alpha + inprod(X[i,], beta)
-    } 
+      zy[i] ~ dnorm(mu[i], prec)
+      mu[i] <- alpha + inprod(zx[i,], beta)
+    }
     
     # Prior
     alpha ~ dnorm(0, 0.001)
     
     #Normal prior
-    for(j in 1:p1) {
+    for(j in 1:p) {
     	beta_temp[j] ~ dnorm(0, 0.001)
-    	g[j] ~ dbern(theta[j])
-    	theta[j] ~ dunif(0,1)
-    	beta[j] <- g[j] * beta_temp[j]	
-    }
-    
-    #Bernoulli prior
-    for(j in (p1+1):p2) {
-    	tprior[j] <- 1 / var_beta[j]
-    	bprior[j] <- 0
-    }
-    
-    for(j in (p1+1):p2) {
-    	beta_temp[j] ~ dnorm(bprior[j], tprior[j])
     	g[j] ~ dbern(theta[j])
     	theta[j] ~ dunif(0,1)
     	beta[j] <- g[j] * beta_temp[j]	
@@ -115,11 +101,11 @@ cat(
 
 params <- c("alpha", "beta", "sigma", "g")
 
-jagsdata = list(N = N, Y = Y, X = X, p1 = p1, p2 = p2, var_beta = rep(1, p2))
+jagsdata = list(N = N, Y = Y, X = X, p = p)
 
 # A list of initial value for the MCMC algorithm 
 inits = function() {
-  list(alpha = 0.0, beta_temp = rep(0,p2), g = rep(0,p2), theta = rep(0.5, p2),
+  list(alpha = 0.0, beta_temp = rep(0,p), g = rep(0,p), theta = rep(0.5, p),
        .RNG.seed = 321, .RNG.name = 'base::Wichmann-Hill') 
 }
 
@@ -128,8 +114,8 @@ fit <- jags.model(file = "models/modelSelection.bug",
                   data = jagsdata, n.adapt = 1000, inits = inits, n.chains = 1)
 
 
-# Burn-in - done with the n.adapt phase
-# update(fit, n.iter = 1000)
+# Burn-in
+update(fit, n.iter = 1000)
 
 # Sample
 results <- coda.samples(fit, variable.names = params,
@@ -162,3 +148,21 @@ plot1 <- ggplot(data = df, aes(y = value, x = var, fill = var)) +
   coord_flip() + theme_minimal() + theme(legend.position="none") + 
   ylab("Posterior Inclusion Probabilities") + xlab("")
 plot1
+
+cols <- colnames(X)
+
+data5 <- X
+for(i in p:1) {
+  if(post_mean_g[i] < 0.5) {
+    data5 <- data5[,-i]
+  }
+}
+save(data5, file='data/model05.dat')
+
+data6 <- X
+for(i in p:1) {
+  if(post_mean_g[i] < 0.6) {
+    data6 <- data6[,-i]
+  }
+}
+save(data6, file='data/model06.dat')
