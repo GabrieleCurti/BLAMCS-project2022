@@ -5,12 +5,12 @@
 
 #--------------------------------SET UP----------------------------------------#
 # Set working directory:
-setwd("/Users/monti/Desktop/BLAMCS-project2022")
+#setwd("/Users/monti/Desktop/BLAMCS-project2022")
 
 ######## DA INSTALLARE: ######## 
-# install.packages("bayesplot")
-# install.packages("ggplot2")
-# install.packages("rstanarm")
+install.packages("bayesplot")
+install.packages("ggplot2")
+install.packages("rstanarm")
 ################################ 
 
 # Load libraries
@@ -20,17 +20,18 @@ library("rstanarm")
 #------------------------------------------------------------------------------#
 
 # Load chains
-load('chains/modelSelection.dat')
+load('chains/spikeNSlab5/betasAndStuff.dat')
+results <- betasMCMC
 print(results)
 summary(results)
 
-resultMatrix <- as.matrix(results)
-print(resultMatrix)
+mcmc_Matrix <- as.matrix(results)
+print(mcmc_Matrix)
 
-posterior <- as.array(results)
-dim(posterior)
+mcmc_array <- as.array(results)
+dim(mcmc_array)
 
-dimnames(posterior)
+dimnames(mcmc_array)
 
 betas_to_plot = c("beta[1]", "beta[4]", "beta[5]", "beta[6]")
 
@@ -40,7 +41,7 @@ betas_to_plot = c("beta[1]", "beta[4]", "beta[5]", "beta[6]")
 # Plots of credible intervals using quantiles
 
 color_scheme_set("red")
-mcmc_intervals(posterior, pars = betas_to_plot)
+mcmc_intervals(mcmc_array, pars = betas_to_plot)
 
 # The points in the plots represent the MEDIAN, the thick segment represent the
 # 50% while the thin segment represents the 90%
@@ -50,7 +51,7 @@ mcmc_intervals(posterior, pars = betas_to_plot)
 
 color_scheme_set("green")
 mcmc_areas(
-  posterior, 
+  mcmc_array, 
   pars = betas_to_plot,
   prob = 0.8, # 80% intervals
   prob_outer = 0.99, # 99%
@@ -69,13 +70,13 @@ mcmc_areas(
 ###########################
 
 color_scheme_set("green")
-mcmc_hist(posterior, pars = betas_to_plot)
+mcmc_hist(mcmc_array, pars = betas_to_plot)
 
 
 # It is possible to plot log(xxx) rather than xxx as-is using the transformation
 # parameter:
 
-mcmc_hist(posterior, pars = betas_to_plot,
+mcmc_hist(mcmc_array, pars = betas_to_plot,
           transformations = list("beta[1]" = "log", "beta[4]" = "log", "beta[5]" = "log", "beta[6]" = "log"))
 
 # In case of multiple Markov chains -> To view separate histograms of each of 
@@ -86,7 +87,7 @@ mcmc_hist(posterior, pars = betas_to_plot,
 # Markov chain
 
 color_scheme_set("brightblue")
-mcmc_hist_by_chain(posterior, pars = c("beta[1]", "beta[3]"))
+mcmc_hist_by_chain(mcmc_array, pars = c("beta[1]", "beta[3]"))
 
 
 ###########################
@@ -94,7 +95,7 @@ mcmc_hist_by_chain(posterior, pars = c("beta[1]", "beta[3]"))
 ###########################
 
 color_scheme_set("purple")
-mcmc_dens(posterior, pars = betas_to_plot)
+mcmc_dens(mcmc_array, pars = betas_to_plot)
 
 
 
@@ -106,7 +107,7 @@ mcmc_dens(posterior, pars = betas_to_plot)
 # chains. But instead of plotting each chain individually, the density estimates
 # are overlaid.
 
-mcmc_dens_overlay(posterior, pars = c("beta[1]", "sigma"))
+mcmc_dens_overlay(mcmc_array, pars = c("beta[1]", "sigma"))
 
 
 
@@ -119,8 +120,8 @@ mcmc_dens_overlay(posterior, pars = c("beta[1]", "sigma"))
 
 # NB: works with multiple chains ONLY
 
-color_scheme_set("teal")
-mcmc_violin(posterior, pars = betas_to_plot, probs = c(0.1, 0.5, 0.9))
+color_scheme_set("orange")
+mcmc_violin(mcmc_array, pars = betas_to_plot, probs = c(0.1, 0.5, 0.9))
 
 #------------------------------------------------------------------------------#
 
@@ -147,7 +148,7 @@ mcmc_violin(posterior, pars = betas_to_plot, probs = c(0.1, 0.5, 0.9))
 # variables have a negative correlation.
 
 color_scheme_set("green")
-mcmc_scatter(posterior, pars = c("sigma", "alpha"), size = 1.5, alpha = 0.5)
+mcmc_scatter(mcmc_array, pars = c("sigma", "alpha"), size = 1.5, alpha = 0.5)
 
 
 ###########################
@@ -162,7 +163,7 @@ mcmc_scatter(posterior, pars = c("sigma", "alpha"), size = 1.5, alpha = 0.5)
 
 # It requires hexbin package
 if (requireNamespace("hexbin", quietly = TRUE)) {
-  mcmc_hex(posterior, pars = c("sigma", "alpha"))
+  mcmc_hex(mcmc_array, pars = c("sigma", "alpha"))
 }
 
 
@@ -176,11 +177,11 @@ if (requireNamespace("hexbin", quietly = TRUE)) {
 
 # NB: works better with multiple chains
 
-mcmc_pairs(posterior, pars = betas_to_plot,
+mcmc_pairs(mcmc_array, pars = betas_to_plot,
            off_diag_args = list(size = 1.5))
 
 
-mcmc_pairs(posterior, pars = betas_to_plot,
+mcmc_pairs(mcmc_array, pars = betas_to_plot,
            off_diag_args = list(size = 1.5),
            diag_fun = "dens",
            off_diag_fun = "hex")
