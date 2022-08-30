@@ -8,6 +8,14 @@ source("http://www.sthda.com/upload/rquery_cormat.r")
 require("corrplot")
 rquery.cormat(train, type = "full")
 
+# plot prices vs. milage and year
+ggplot(train, 
+       aes(x = train$mileage, 
+           y = train$price,
+           color = train$year)) +
+  geom_point() + 
+  labs(title = "ford car prices by mileage and year")
+
 ######################
 
 # It makes sense to inspect the relations between $price and variables like 
