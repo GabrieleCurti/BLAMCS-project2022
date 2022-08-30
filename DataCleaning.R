@@ -3,7 +3,7 @@ library('fastDummies')
 
 rm(list=ls())
 
-setwd("~/BLAMCS-project2022")
+#setwd("~/BLAMCS-project2022")
 ford <- read.table("ford.txt", header=T)
 
 summary(ford)
@@ -25,9 +25,9 @@ ford2$model <- NULL
 ford2$transmission <- NULL
 
 #Dropping one of each dummy variable since they are linearly reconstructable using a XOR
-ford2$fuelType_Hybrid <- NULL
-ford2$`transmission_Semi-Auto` <- NULL
-ford2$`model_ Grand Tourneo Connect` <- NULL #Who bought this?
+#ford2$fuelType_Hybrid <- NULL
+#ford2$`transmission_Semi-Auto` <- NULL
+#ford2$`model_ Grand Tourneo Connect` <- NULL #Who bought this?
 
 summary(ford2)
 
@@ -44,6 +44,9 @@ set.seed(1)
 sample <- sample(c(TRUE, FALSE), nrow(ford2), replace=TRUE, prob=c(0.7,0.3))
 train  <- ford2[sample, ]
 test   <- ford2[!sample, ]
+
+save(train, file="data/ford_train.dat")
+save(test, file="data/ford_test.dat")
 
 # Trying a simple linear regression
 Y <- train$price

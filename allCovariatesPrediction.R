@@ -1,42 +1,10 @@
 library('rjags')
-library('fastDummies')
 
 rm(list=ls())
 
-setwd("~/GitHub/BLAMCS-project2022")
-ford <- read.table("ford.txt", header=T)
-
-summary(ford)
-
-modelCategories <- unique(ford$model)
-transmissionCategories <- unique(ford$transmission)
-fueltCategories <- unique(ford$fuelType)
-yearCat <- unique(ford$year)
-
-# Transform categorical attributes using dummy variable encoding
-ford2 <- ford
-
-ford2 <- dummy_cols(ford2, select_columns = "transmission")
-ford2 <- dummy_cols(ford2, select_columns = "model")
-ford2 <- dummy_cols(ford2, select_columns = "fuelType")
-
-ford2$fuelType <- NULL
-ford2$model <- NULL
-ford2$transmission <- NULL
-
-#Transforming ordinal attributes using ordinal variable enconding
-encode_ordinal <- function(x, order = unique(x)) {
-  x <- as.numeric(factor(x, levels = order, exclude = NULL))
-  x
-}
-
-ford2$year <- encode_ordinal(ford2$year)
-
-# Split the dataset 70% for training, 30% for testing
-set.seed(1)
-sample <- sample(c(TRUE, FALSE), nrow(ford2), replace=TRUE, prob=c(0.7,0.3))
-train  <- ford2[sample, ]
-test   <- ford2[!sample, ]
+# Load train and test
+load("data/ford_train.dat")
+load("data/ford_test.dat")
 
 # Trying a simple linear regression with all features
 y <- train$price
