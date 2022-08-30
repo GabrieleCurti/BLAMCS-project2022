@@ -3,8 +3,8 @@ library('rjags')
 rm(list=ls())
 
 # Load train and test
-load("data/ford_train.dat")
-load("data/ford_test.dat")
+load("data/ford_train_noOutlier.dat")
+load("data/ford_test_noOutlier.dat")
 
 # Trying a simple linear regression with all features
 y <- train$price
@@ -34,7 +34,7 @@ cat(
     # Standardize covariates
     for ( j in 1:p ) {
       xm[j]  <- mean(x[,j])
-      xsd[j] <-   sd(x[,j])
+      xsd[j] <-   ifelse(sd(x[,j]) > 0, sd(x[,j]), 0.00001)
       for ( i in 1:N ) {
         zx[i,j] <- ( x[i,j] - xm[j] ) / xsd[j]
       }
@@ -42,7 +42,7 @@ cat(
     # Standardize test set!
     for ( j in 1:p ) {
       xpm[j]  <- mean(xp[,j])
-      xpsd[j] <-   sd(xp[,j])
+      xpsd[j] <-   ifelse(sd(xp[,j]) > 0, sd(xp[,j]), 0.00001)
       for ( i in 1:Ntest ) {
         zxp[i,j] <- ( xp[i,j] - xpm[j] ) / xpsd[j]
       }
@@ -86,7 +86,7 @@ cat(
   , file = "models/predictionNormalJags.bug")
 
 # Save betas and hyper parameters
-params <- c("alpha", "beta", "sigma", "R2", "yp", "mu", "y")
+params <- c("alpha", "beta", "sigma", "R2", "yp", "mu")
 
 jagsdata = list(N = N, y = y, x = x, p = p, xp = xp, Ntest = Ntest)
 
@@ -105,6 +105,6 @@ betasMCMC <- results[,grep("alpha|sigma|R2|^beta",colnames(results[[1]]))]
 predictionsTestMCMC <- results[,grep("^yp",colnames(results[[1]]))]
 predictionsTrainMCMC <- results[,grep("^mu",colnames(results[[1]]))]
 
-save(betasMCMC, file='chains/allCovariates/betasAndStuff.dat')
-save(predictionsTestMCMC, file='chains/allCovariates/predictionOnTest.dat')
-save(predictionsTrainMCMC, file='chains/allCovariates/predictionOnTrain.dat')
+save(betasMCMC, file='chains/allCovariatesNoOut/betasAndStuff.dat')
+save(predictionsTestMCMC, file='chains/allCovariatesNoOut/predictionOnTest.dat')
+save(predictionsTrainMCMC, file='chains/allCovariatesNoOut/predictionOnTrain.dat')

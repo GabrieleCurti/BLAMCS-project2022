@@ -3,8 +3,8 @@ library('rjags')
 rm(list=ls())
 
 # Load train and test
-load("data/ford_train.dat")
-load("data/ford_test.dat")
+load("data/ford_train_NoOutlier.dat")
+load("data/ford_test_NoOutlier.dat")
 yp <- test$price
 
 computeR2 <- function(betaDataString) {
@@ -30,6 +30,19 @@ computeTrainRMSE <- function(predictionFileString, y) {
   print(rmse)
   print((rmse/mean(train$price))*100)
 }
+
+computeR2("chains/allCovariatesNoOut/betasAndStuff.dat")
+computeR2("chains/spikeNSlab5NoOut/betasAndStuff.dat")
+computeR2("chains/spikeNSlab6NoOut/betasAndStuff.dat")
+
+computeTestRMSE("chains/allCovariatesNoOut/predictionOnTest.dat",test$price)
+computeTestRMSE("chains/spikeNSlab5NoOut/predictionOnTest.dat", test$price)
+computeTestRMSE("chains/spikeNSlab6NoOut/predictionOnTest.dat", test$price)
+
+computeTrainRMSE("chains/allCovariatesNoOut/predictionOnTrain.dat",train$price)
+computeTrainRMSE("chains/spikeNSlab5NoOut/predictionOnTrain.dat", train$price)
+computeTrainRMSE("chains/spikeNSlab6NoOut/predictionOnTrain.dat", train$price)
+
 
 computeR2("chains/allCovariates/betasAndStuff.dat")
 computeR2("chains/basSelection/betasAndStuff.dat")

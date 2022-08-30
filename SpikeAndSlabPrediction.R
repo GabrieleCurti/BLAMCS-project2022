@@ -1,11 +1,10 @@
 library('rjags')
-library('fastDummies')
 
 rm(list=ls())
 
 setwd("~/GitHub/BLAMCS-project2022")
-load('data/ford05.dat')
-load('data/ford06.dat')
+load('data/fordNoOutliers05.dat')
+load('data/fordNoOutliers06.dat')
 
 ford2 <- data5
 # Split the dataset 70% for training, 30% for testing
@@ -42,7 +41,7 @@ cat(
     # Standardize covariates
     for ( j in 1:p ) {
       xm[j]  <- mean(x[,j])
-      xsd[j] <-   sd(x[,j])
+      xsd[j] <-   ifelse(sd(x[,j]) > 0, sd(x[,j]), 0.00001)
       for ( i in 1:N ) {
         zx[i,j] <- ( x[i,j] - xm[j] ) / xsd[j]
       }
@@ -50,7 +49,7 @@ cat(
     # Standardize test set!
     for ( j in 1:p ) {
       xpm[j]  <- mean(xp[,j])
-      xpsd[j] <-   sd(xp[,j])
+      xpsd[j] <-   ifelse(sd(xp[,j]) > 0, sd(xp[,j]), 0.00001)
       for ( i in 1:Ntest ) {
         zxp[i,j] <- ( xp[i,j] - xpm[j] ) / xpsd[j]
       }
@@ -113,9 +112,9 @@ betasMCMC <- results[,grep("alpha|sigma|R2|^beta",colnames(results[[1]]))]
 predictionsTestMCMC <- results[,grep("^yp",colnames(results[[1]]))]
 predictionsTrainMCMC <- results[,grep("^mu",colnames(results[[1]]))]
 
-save(betasMCMC, file='chains/spikeNSlab5/betasAndStuff.dat')
-save(predictionsTestMCMC, file='chains/spikeNSlab5/predictionOnTest.dat')
-save(predictionsTrainMCMC, file='chains/spikeNSlab5/predictionOnTrain.dat')
+save(betasMCMC, file='chains/spikeNSlab5NoOut/betasAndStuff.dat')
+save(predictionsTestMCMC, file='chains/spikeNSlab5NoOut/predictionOnTest.dat')
+save(predictionsTrainMCMC, file='chains/spikeNSlab5NoOut/predictionOnTrain.dat')
 
 ford2 <- data6
 # Split the dataset 70% for training, 30% for testing
@@ -152,7 +151,7 @@ cat(
     # Standardize covariates
     for ( j in 1:p ) {
       xm[j]  <- mean(x[,j])
-      xsd[j] <-   sd(x[,j])
+      xsd[j] <-   ifelse(sd(x[,j]) > 0, sd(x[,j]), 0.00001)
       for ( i in 1:N ) {
         zx[i,j] <- ( x[i,j] - xm[j] ) / xsd[j]
       }
@@ -160,7 +159,7 @@ cat(
     # Standardize test set!
     for ( j in 1:p ) {
       xpm[j]  <- mean(xp[,j])
-      xpsd[j] <-   sd(xp[,j])
+      xpsd[j] <-   ifelse(sd(xp[,j]) > 0, sd(xp[,j]), 0.00001)
       for ( i in 1:Ntest ) {
         zxp[i,j] <- ( xp[i,j] - xpm[j] ) / xpsd[j]
       }
@@ -223,6 +222,6 @@ betasMCMC <- results[,grep("alpha|sigma|R2|^beta",colnames(results[[1]]))]
 predictionsTestMCMC <- results[,grep("^yp",colnames(results[[1]]))]
 predictionsTrainMCMC <- results[,grep("^mu",colnames(results[[1]]))]
 
-save(betasMCMC, file='chains/spikeNSlab6/betasAndStuff.dat')
-save(predictionsTestMCMC, file='chains/spikeNSlab6/predictionOnTest.dat')
-save(predictionsTrainMCMC, file='chains/spikeNSlab6/predictionOnTrain.dat')
+save(betasMCMC, file='chains/spikeNSlab6NoOut/betasAndStuff.dat')
+save(predictionsTestMCMC, file='chains/spikeNSlab6NoOut/predictionOnTest.dat')
+save(predictionsTrainMCMC, file='chains/spikeNSlab6NoOut/predictionOnTrain.dat')

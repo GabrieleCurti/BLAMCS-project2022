@@ -10,7 +10,7 @@
     # Standardize covariates
     for ( j in 1:p ) {
       xm[j]  <- mean(x[,j])
-      xsd[j] <-   sd(x[,j])
+      xsd[j] <-   ifelse(sd(x[,j]) > 0, sd(x[,j]), 0.00001)
       for ( i in 1:N ) {
         zx[i,j] <- ( x[i,j] - xm[j] ) / xsd[j]
       }
@@ -18,7 +18,7 @@
     # Standardize test set!
     for ( j in 1:p ) {
       xpm[j]  <- mean(xp[,j])
-      xpsd[j] <-   sd(xp[,j])
+      xpsd[j] <-   ifelse(sd(xp[,j]) > 0, sd(xp[,j]), 0.00001)
       for ( i in 1:Ntest ) {
         zxp[i,j] <- ( xp[i,j] - xpm[j] ) / xpsd[j]
       }
