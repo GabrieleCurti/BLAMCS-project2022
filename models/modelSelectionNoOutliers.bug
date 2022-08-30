@@ -1,0 +1,41 @@
+
+  data {
+    # Standardize target
+    ym <- mean(Y)
+    ysd <- sd(Y)
+    for ( i in 1:N ) {
+      zy[i] <- ( Y[i] - ym ) / ysd
+    }
+    # Standardize covariates
+    for ( j in 1:p ) {
+      xm[j]  <- mean(X[,j])
+      xsd[j] <- ifelse(sd(X[,j]) > 0, sd(X[,j]), 0.00001)
+      
+      for ( i in 1:N ) {
+        zx[i,j] <- ( X[i,j] - xm[j] ) / xsd[j]
+      }
+    }
+  }
+  
+  model {
+    # Likelihood 
+    for (i in 1:N) {
+      zy[i] ~ dnorm(mu[i], prec)
+      mu[i] <- alpha + inprod(zx[i,], beta)
+    }
+    
+    # Prior
+    alpha ~ dnorm(0, 0.001)
+    
+    #Normal prior
+    for(j in 1:p) {
+    	beta_temp[j] ~ dnorm(0, 0.001)
+    	g[j] ~ dbern(theta[j])
+    	theta[j] ~ dunif(0,1)
+    	beta[j] <- g[j] * beta_temp[j]	
+    }
+
+    sigma ~ dgamma(0.01, 0.01)
+    prec <- 1 / (sigma*sigma)
+  }
+  

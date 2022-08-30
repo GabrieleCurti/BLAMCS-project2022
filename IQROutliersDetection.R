@@ -4,7 +4,7 @@ library('fastDummies')
 
 rm(list=ls())
 
-setwd("C:/Users/Pc/Documents/GitHub/BLAMCS-project2022")
+setwd("C:/Users/Hp/Documents/GitHub/BLAMCS-project2022")
 ford <- read.table("ford.txt", header=T)
 
 summary(ford)
@@ -24,11 +24,6 @@ ford2 <- dummy_cols(ford2, select_columns = "fuelType")
 ford2$fuelType <- NULL
 ford2$model <- NULL
 ford2$transmission <- NULL
-
-#Dropping one of each dummy variable since they are linearly reconstructable using a XOR
-ford2$fuelType_Hybrid <- NULL
-ford2$`transmission_Semi-Auto` <- NULL
-ford2$`model_ Grand Tourneo Connect` <- NULL #Who bought this?
 
 #Transforming ordinal attributes using ordinal variable enconding
 encode_ordinal <- function(x, order = unique(x)) {
@@ -94,4 +89,4 @@ Tmax = mean + (3*sd)
 fordNoOutliers<- subset(fordNoOutliers, fordNoOutliers$tax > Tmin & fordNoOutliers$tax < Tmax)
 
 
-write.table(fordNoOutliers, file = "fordNoOutliers.dat")
+save(fordNoOutliers, file = "data/fordNoOutliers.dat")
