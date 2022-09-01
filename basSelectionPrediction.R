@@ -3,22 +3,14 @@ library('rjags')
 rm(list=ls())
 
 # Load train and test
-load("data/ford_train.dat")
-load("data/ford_test.dat")
+load("data/ford_BASmodel_NoOutlier.dat")
+load("data/ford_BASmodel_NoOutlier_test.dat")
 
 # Trying a simple linear regression with all features
 y <- train$price
 x <- train[,-2] # Dropping target
-x <- train[,-18]
-x <- train[,-21]
-x <- train[,-26]
-x <- train[,-29]
 yp <- test$price
 xp <- test[,-2] # Dropping target
-xp <- train[,-18]
-xp <- train[,-21]
-xp <- train[,-26]
-xp <- train[,-29]
 
 x <- as.matrix(x)
 y <- as.vector(y)

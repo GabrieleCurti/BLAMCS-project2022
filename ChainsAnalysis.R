@@ -7,6 +7,16 @@ load("data/ford_train_NoOutlier.dat")
 load("data/ford_test_NoOutlier.dat")
 yp <- test$price
 
+load("chains/allCovariatesNoOut/predictionOnTest.dat")
+matrix <- as.matrix(predictionsTestMCMC)
+
+computeSigma <- function(betaDataString) {
+  load(betaDataString)
+  allMatrix <- as.matrix(betasMCMC)
+  print(mean(allMatrix[,"sigma"]))
+}
+
+
 computeR2 <- function(betaDataString) {
   load(betaDataString)
   allMatrix <- as.matrix(betasMCMC)
@@ -31,9 +41,34 @@ computeTrainRMSE <- function(predictionFileString, y) {
   print((rmse/mean(train$price))*100)
 }
 
+computeConfidenceInterval <- function(predictionFileString, dataPoint) {
+  load(predictionFileString)
+  allMatrix <- as.matrix(predictionsTestMCMC)
+  predictions <- allMatrix[,dataPoint]
+  probs <- c(0.05, 0.95)
+  print(mean(predictions))
+  quantile(predictions, probs)
+}
+
+computeConfidenceInterval("chains/spikeNSlab5NoOut/predictionOnTest.dat", "yp[1]")
+computeConfidenceInterval("chains/spikeNSlab5NoOut/predictionOnTest.dat", "yp[2]")
+computeConfidenceInterval("chains/spikeNSlab5NoOut/predictionOnTest.dat", "yp[3]")
+
 computeR2("chains/allCovariatesNoOut/betasAndStuff.dat")
+computeR2("chains/basSelectionNoOut/betasAndStuff.dat")
 computeR2("chains/spikeNSlab5NoOut/betasAndStuff.dat")
 computeR2("chains/spikeNSlab6NoOut/betasAndStuff.dat")
+
+computeSigma("chains/allCovariatesNoOut/betasAndStuff.dat")
+computeSigma("chains/basSelectionNoOut/betasAndStuff.dat")
+computeSigma("chains/spikeNSlab5NoOut/betasAndStuff.dat")
+computeSigma("chains/spikeNSlab6NoOut/betasAndStuff.dat")
+
+computeSigma("chains/allCovariates/betasAndStuff.dat")
+computeSigma("chains/basSelection/betasAndStuff.dat")
+computeSigma("chains/spikeNSlab5/betasAndStuff.dat")
+computeSigma("chains/spikeNSlab6/betasAndStuff.dat")
+
 
 computeTestRMSE("chains/allCovariatesNoOut/predictionOnTest.dat",test$price)
 computeTestRMSE("chains/spikeNSlab5NoOut/predictionOnTest.dat", test$price)
@@ -42,6 +77,10 @@ computeTestRMSE("chains/spikeNSlab6NoOut/predictionOnTest.dat", test$price)
 computeTrainRMSE("chains/allCovariatesNoOut/predictionOnTrain.dat",train$price)
 computeTrainRMSE("chains/spikeNSlab5NoOut/predictionOnTrain.dat", train$price)
 computeTrainRMSE("chains/spikeNSlab6NoOut/predictionOnTrain.dat", train$price)
+
+computeR2("chains/basSelectionNoOut/betasAndStuff.dat")
+computeTestRMSE("chains/basSelectionNoOut/predictionOnTest.dat", test$price)
+computeTrainRMSE("chains/basSelectionNoOut/predictionOnTrain.dat", train$price)
 
 
 computeR2("chains/allCovariates/betasAndStuff.dat")
