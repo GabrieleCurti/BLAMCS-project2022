@@ -126,7 +126,7 @@ dev.off()
 df <- data.frame(value = post_mean_g, var = colnames(X))
 plot1 <- ggplot(data = df, aes(y = value, x = var, fill = var)) + 
   geom_bar(stat="identity") + 
-  geom_hline(mapping = aes(yintercept = .5), col = 2, lwd = 1.1) +
+  geom_hline(mapping = aes(yintercept = .6), col = 2, lwd = 1.1) +
   coord_flip() + theme_minimal() + theme(legend.position="none") + 
   ylab("Posterior Inclusion Probabilities") + xlab("")
 plot1
