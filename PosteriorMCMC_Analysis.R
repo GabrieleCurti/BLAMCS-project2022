@@ -20,7 +20,7 @@ library("rstanarm")
 #------------------------------------------------------------------------------#
 
 # Load chains
-load('chains/spikeNSlab5/betasAndStuff.dat')
+load('chains/spikeNSlab5NoOut/betasAndStuff.dat')
 results <- betasMCMC
 print(results)
 summary(results)
@@ -41,7 +41,7 @@ betas_to_plot = c("beta[1]", "beta[4]", "beta[5]", "beta[6]")
 # Plots of credible intervals using quantiles
 
 color_scheme_set("red")
-mcmc_intervals(mcmc_array, pars = betas_to_plot)
+mcmc_intervals(mcmc_array)
 
 # The points in the plots represent the MEDIAN, the thick segment represent the
 # 50% while the thin segment represents the 90%
@@ -52,7 +52,6 @@ mcmc_intervals(mcmc_array, pars = betas_to_plot)
 color_scheme_set("green")
 mcmc_areas(
   mcmc_array, 
-  pars = betas_to_plot,
   prob = 0.8, # 80% intervals
   prob_outer = 0.99, # 99%
   point_est = "mean"
@@ -72,12 +71,6 @@ mcmc_areas(
 color_scheme_set("green")
 mcmc_hist(mcmc_array, pars = betas_to_plot)
 
-
-# It is possible to plot log(xxx) rather than xxx as-is using the transformation
-# parameter:
-
-mcmc_hist(mcmc_array, pars = betas_to_plot,
-          transformations = list("beta[1]" = "log", "beta[4]" = "log", "beta[5]" = "log", "beta[6]" = "log"))
 
 # In case of multiple Markov chains -> To view separate histograms of each of 
 # the four Markov chains we can use mcmc_hist_by_chain, which plots each chain 
@@ -107,7 +100,7 @@ mcmc_dens(mcmc_array, pars = betas_to_plot)
 # chains. But instead of plotting each chain individually, the density estimates
 # are overlaid.
 
-mcmc_dens_overlay(mcmc_array, pars = c("beta[1]", "sigma"))
+mcmc_dens_overlay(mcmc_array)
 
 
 
@@ -177,11 +170,11 @@ if (requireNamespace("hexbin", quietly = TRUE)) {
 
 # NB: works better with multiple chains
 
-mcmc_pairs(mcmc_array, pars = betas_to_plot,
+mcmc_pairs(mcmc_array,
            off_diag_args = list(size = 1.5))
 
 
-mcmc_pairs(mcmc_array, pars = betas_to_plot,
+mcmc_pairs(mcmc_array,
            off_diag_args = list(size = 1.5),
            diag_fun = "dens",
            off_diag_fun = "hex")
