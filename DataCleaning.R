@@ -25,9 +25,9 @@ ford2$model <- NULL
 ford2$transmission <- NULL
 
 #Dropping one of each dummy variable since they are linearly reconstructable using a XOR
-#ford2$fuelType_Hybrid <- NULL
-#ford2$`transmission_Semi-Auto` <- NULL
-#ford2$`model_ Grand Tourneo Connect` <- NULL #Who bought this?
+ford2$fuelType_Hybrid <- NULL
+ford2$`transmission_Semi-Auto` <- NULL
+ford2$`model_ Grand Tourneo Connect` <- NULL #Who bought this?
 
 summary(ford2)
 
@@ -39,7 +39,7 @@ encode_ordinal <- function(x, order = unique(x)) {
 
 ford2$year <- encode_ordinal(ford2$year)
 
-ford2 <- read.table("fordNoOutliers.dat", header=T)
+#ford2 <- read.table("fordNoOutliers.dat", header=T)
 
 # Split the dataset 70% for training, 30% for testing
 set.seed(1)
@@ -47,8 +47,8 @@ sample <- sample(c(TRUE, FALSE), nrow(ford2), replace=TRUE, prob=c(0.7,0.3))
 train  <- ford2[sample, ]
 test   <- ford2[!sample, ]
 
-save(train, file="data/ford_train_NoOutlier.dat")
-save(test, file="data/ford_test_NoOutlier.dat")
+#save(train, file="data/ford_train_NoOutlier.dat")
+#save(test, file="data/ford_test_NoOutlier.dat")
 
 # Trying a simple linear regression
 Y <- train$price
