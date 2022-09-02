@@ -3,8 +3,9 @@ library('rjags')
 rm(list=ls())
 
 # Load train and test
-load("data/ford_BASmodel_NoOutlier.dat")
-load("data/ford_BASmodel_NoOutlier_test.dat")
+load("data/ford_BASmodel.dat")
+load("data/ford_BASmodel_test.dat")
+train <- ford_BASmodel_NoOutlier
 
 # Trying a simple linear regression with all features
 y <- train$price
@@ -41,6 +42,6 @@ betasMCMC <- results[,grep("alpha|sigma|R2|^beta",colnames(results[[1]]))]
 predictionsTestMCMC <- results[,grep("^yp",colnames(results[[1]]))]
 predictionsTrainMCMC <- results[,grep("^mu",colnames(results[[1]]))]
 
-save(betasMCMC, file='chains/basSelectionNoOut/betasAndStuff.dat')
-save(predictionsTestMCMC, file='chains/basSelectionNoOut/predictionOnTest.dat')
-save(predictionsTrainMCMC, file='chains/basSelectionNoOut/predictionOnTrain.dat')
+save(betasMCMC, file='chains/basSelection/betasAndStuff.dat')
+save(predictionsTestMCMC, file='chains/basSelection/predictionOnTest.dat')
+save(predictionsTrainMCMC, file='chains/basSelection/predictionOnTrain.dat')
