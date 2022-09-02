@@ -3,8 +3,8 @@ library('rjags')
 rm(list=ls())
 
 setwd("~/GitHub/BLAMCS-project2022")
-load('data/fordNoOutliers05.dat')
-load('data/fordNoOutliers06.dat')
+load('data/ford05.dat')
+load('data/ford06.dat')
 
 ford2 <- data5
 # Split the dataset 70% for training, 30% for testing
@@ -112,9 +112,9 @@ betasMCMC <- results[,grep("alpha|sigma|R2|^beta",colnames(results[[1]]))]
 predictionsTestMCMC <- results[,grep("^yp",colnames(results[[1]]))]
 predictionsTrainMCMC <- results[,grep("^mu",colnames(results[[1]]))]
 
-save(betasMCMC, file='chains/spikeNSlab5NoOut/betasAndStuff.dat')
-save(predictionsTestMCMC, file='chains/spikeNSlab5NoOut/predictionOnTest.dat')
-save(predictionsTrainMCMC, file='chains/spikeNSlab5NoOut/predictionOnTrain.dat')
+save(betasMCMC, file='chains/spikeNSlab5/betasAndStuff.dat')
+save(predictionsTestMCMC, file='chains/spikeNSlab5/predictionOnTest.dat')
+save(predictionsTrainMCMC, file='chains/spikeNSlab5/predictionOnTrain.dat')
 
 ford2 <- data6
 # Split the dataset 70% for training, 30% for testing
@@ -222,6 +222,6 @@ betasMCMC <- results[,grep("alpha|sigma|R2|^beta",colnames(results[[1]]))]
 predictionsTestMCMC <- results[,grep("^yp",colnames(results[[1]]))]
 predictionsTrainMCMC <- results[,grep("^mu",colnames(results[[1]]))]
 
-save(betasMCMC, file='chains/spikeNSlab6NoOut/betasAndStuff.dat')
-save(predictionsTestMCMC, file='chains/spikeNSlab6NoOut/predictionOnTest.dat')
-save(predictionsTrainMCMC, file='chains/spikeNSlab6NoOut/predictionOnTrain.dat')
+save(betasMCMC, file='chains/spikeNSlab6/betasAndStuff.dat')
+save(predictionsTestMCMC, file='chains/spikeNSlab6/predictionOnTest.dat')
+save(predictionsTrainMCMC, file='chains/spikeNSlab6/predictionOnTrain.dat')
