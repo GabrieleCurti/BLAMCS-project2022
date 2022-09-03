@@ -66,7 +66,7 @@ mcmc_trace(mcmc_chains, window = c(400,500)) +
 # sample), as consequence of that the parameter space has been explored 
 # only few times. A possible solution might be increasing our sample size.
 
-# The remaining plots show instead no apparent anomalies and can be regarded as
+# The plots show instead no apparent anomalies and can be regarded as
 # 'healthy chains'
 
 # We can use the Autocorrelation function (ACF) plots to further inspect the 

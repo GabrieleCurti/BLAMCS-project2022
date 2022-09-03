@@ -46,7 +46,7 @@ all_betas = c("beta[1]", "beta[2]", "beta[3]", "beta[4]",
               "beta[9]", "beta[10]", "beta[11]", "beta[12]", "beta[13]",
               "beta[14]", "beta[15]", "beta[16]", "beta[17]", "beta[18]")
 
-betas_for_report = c("beta[7]", "beta[8]", "beta[9]", "beta[14]")
+betas_for_report = c("beta[1]", "beta[5]", "beta[9]", "beta[17]")
 
 
 #---------------------POSTERIOR UNCERTANTY INTERVALS---------------------------#
@@ -93,7 +93,7 @@ mcmc_hist(mcmc_array, pars = betas_for_report)
 # NB: The function REQUIRES multiple chains. It WILL NOT WORK with only one 
 # Markov chain
 
-color_scheme_set("green")
+color_scheme_set("lime")
 mcmc_hist_by_chain(mcmc_array, pars = betas_for_report)
 
 
