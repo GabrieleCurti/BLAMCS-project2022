@@ -33,15 +33,28 @@ dim(mcmc_array)
 
 dimnames(mcmc_array)
 
-betas_to_plot = c("beta[1]", "beta[4]", "beta[5]", "beta[6]")
+betas_to_plot_1 = c("beta[1]", "beta[2]", "beta[3]", "beta[4]")
+
+betas_to_plot_2 = c("beta[5]", "beta[6]", "beta[7]", "beta[8]")
+
+betas_to_plot_3 = c("beta[9]", "beta[10]", "beta[11]", "beta[12]", "beta[13]")
+
+betas_to_plot_4 = c("beta[14]", "beta[15]", "beta[16]", "beta[17]", "beta[18]")
+
+all_betas = c("beta[1]", "beta[2]", "beta[3]", "beta[4]", 
+              "beta[5]", "beta[6]", "beta[7]", "beta[8]",
+              "beta[9]", "beta[10]", "beta[11]", "beta[12]", "beta[13]",
+              "beta[14]", "beta[15]", "beta[16]", "beta[17]", "beta[18]")
+
+betas_for_report = c("beta[7]", "beta[8]", "beta[9]", "beta[14]")
 
 
 #---------------------POSTERIOR UNCERTANTY INTERVALS---------------------------#
 
 # Plots of credible intervals using quantiles
 
-color_scheme_set("red")
-mcmc_intervals(mcmc_array)
+color_scheme_set("green")
+mcmc_intervals(mcmc_array, pars = betas_for_report)
 
 # The points in the plots represent the MEDIAN, the thick segment represent the
 # 50% while the thin segment represents the 90%
@@ -52,6 +65,7 @@ mcmc_intervals(mcmc_array)
 color_scheme_set("green")
 mcmc_areas(
   mcmc_array, 
+  pars = betas_for_report,
   prob = 0.8, # 80% intervals
   prob_outer = 0.99, # 99%
   point_est = "mean"
@@ -69,7 +83,7 @@ mcmc_areas(
 ###########################
 
 color_scheme_set("green")
-mcmc_hist(mcmc_array, pars = betas_to_plot)
+mcmc_hist(mcmc_array, pars = betas_for_report)
 
 
 # In case of multiple Markov chains -> To view separate histograms of each of 
@@ -79,16 +93,16 @@ mcmc_hist(mcmc_array, pars = betas_to_plot)
 # NB: The function REQUIRES multiple chains. It WILL NOT WORK with only one 
 # Markov chain
 
-color_scheme_set("brightblue")
-mcmc_hist_by_chain(mcmc_array, pars = c("beta[1]", "beta[3]"))
+color_scheme_set("green")
+mcmc_hist_by_chain(mcmc_array, pars = betas_for_report)
 
 
 ###########################
 #       DENSITIES
 ###########################
 
-color_scheme_set("purple")
-mcmc_dens(mcmc_array, pars = betas_to_plot)
+color_scheme_set("green")
+mcmc_dens(mcmc_array, pars = betas_for_report)
 
 
 
@@ -114,7 +128,7 @@ mcmc_dens_overlay(mcmc_array)
 # NB: works with multiple chains ONLY
 
 color_scheme_set("orange")
-mcmc_violin(mcmc_array, pars = betas_to_plot, probs = c(0.1, 0.5, 0.9))
+mcmc_violin(mcmc_array, pars = betas_for_report, probs = c(0.1, 0.5, 0.9))
 
 #------------------------------------------------------------------------------#
 
@@ -140,8 +154,8 @@ mcmc_violin(mcmc_array, pars = betas_to_plot, probs = c(0.1, 0.5, 0.9))
 # points start at high y-values on the y-axis and progress down to low values, the 
 # variables have a negative correlation.
 
-color_scheme_set("green")
-mcmc_scatter(mcmc_array, pars = c("sigma", "alpha"), size = 1.5, alpha = 0.5)
+color_scheme_set("green") 
+mcmc_scatter(mcmc_array, pars = betas_for_report, size = 1.5, alpha = 0.5)
 
 
 ###########################
@@ -175,6 +189,7 @@ mcmc_pairs(mcmc_array,
 
 
 mcmc_pairs(mcmc_array,
+           pars = betas_for_report,
            off_diag_args = list(size = 1.5),
            diag_fun = "dens",
            off_diag_fun = "hex")
