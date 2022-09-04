@@ -31,6 +31,10 @@ This repositories includes all the R scripts and data files we used.
 - *dataCorrelationAnalysis.R* is used to graphically explore the correlations that exists between the dataset features.
 - *PosteriorMCMC_Analysis.R* is used to cunduct an analysis on the posterior densities of the parameter vectors obtained from the JAGS model.
 - *MCMCdiagnostic.R* contains a detailed diagnostic regarding the mcmc chains convergence.
+- *BICModelSelection.R* is used for computing model selection using BAS.
+- *IQROutliersDetection.R* is used for computing and removing outliers.
+- *modelSelection.R* performs model selection with JAGS on the original dataset using Spike And Slab.
+- *modelSelectionNoOutliers.R* performs model selection with JAGS on the dataset without outliers using Spike And Slab.
 
 Authors:
 
